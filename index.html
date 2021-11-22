@@ -1,37 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- displays site properly based on user's device -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- displays site properly based on user's device -->
 
-  <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
-  
-  <title>Frontend Mentor | Rock, Paper, Scissors</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
 
-  Score
-  Rules
+    <script src="https://cdn-tailwindcss.vercel.app"></script>
 
-  You Picked
-  The House Picked
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(ellipse at center, var(--tw-gradient-stops))',
+                    }
+                },
+                fontFamily: {
+                    'sans': 'BarlowSemiCondensed'
+                }
+            },
+        }
+    </script>
 
-  You Win
-  You Lose
+    <style type="text/tailwindcss">
 
-  Play Again
+    </style>
 
-  <!-- Feel free to remove these styles or customise in your own stylesheet 👍 -->
-  <style>
-    .attribution { font-size: 11px; text-align: center; }
-    .attribution a { color: hsl(228, 45%, 44%); }
-  </style>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+
+    <title>Frontend Mentor | Rock, Paper, Scissors</title>
+
+    <style type="text/tailwindcss">
+
+        @font-face {
+            font-family: "BarlowSemiCondensed";
+            font-weight: 600;
+            src: url("fonts/BarlowSemiCondensed-Bold.ttf") format("truetype");
+        }
+
+        @font-face {
+            font-family: "BarlowSemiCondensed";
+            font-weight: 700;
+            src: url("fonts/BarlowSemiCondensed-SemiBold.ttf") format("truetype");
+        }
+
+        .attribution {
+            display: none;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .attribution a {
+            color: hsl(228, 45%, 44%);
+        }
+    </style>
 </head>
-<body>
-
-
-  
-  <div class="attribution">
-    Challenge by <a href="https://www.frontendmentor.io?ref=challenge" target="_blank">Frontend Mentor</a>. 
+<body class="bg-gradient-radial from-[#1f3756] to-[#141539] h-screen w-screen p-[32px] pb-[54px]">
+<div id="app" class="w-full h-full flex flex-col justify-between max-w-[660px] mx-auto">
+    <div class="border-[3px] border-opacity-50 border-[#606e85] rounded w-full flex pl-[20px] pr-[10px] py-[12px] justify-between">
+        <ul class="flex flex-col justify-center">
+            <li v-for="choice in gameName" class="text-xl text-white leading-4 uppercase font-bold">{{ choice }}</li>
+        </ul>
+        <div class="flex flex-col items-center bg-white px-[20px] py-[10px] rounded">
+            <div class="uppercase text-xs text-[#2a46c0] font-semibold tracking-widest">Score</div>
+            <div class="text-4xl font-bold">{{ score }}</div>
+        </div>
+    </div>
+    <div class="flex justify-center mt-[85px] relative h-[200px] w-[311px] mx-auto">
+        <div v-if="step === 0">
+            <img class="h-[200px]" src="images/bg-triangle.svg" alt="bg-triangle">
+            <div @click="play('paper')" class="h-[130px] w-[130px] rounded-full bg-white absolute flex justify-center items-center border-[15px] border-[#4865f4] left-0 top-[-55px] cursor-pointer">
+                <img src="images/icon-paper.svg" alt="">
+            </div>
+            <div @click="play('scissors')" class="h-[130px] w-[130px] rounded-full bg-white absolute flex justify-center items-center border-[15px] border-[#ec9e0e] right-0 top-[-55px] cursor-pointer">
+                <img src="images/icon-scissors.svg" alt="">
+            </div>
+            <div @click="play('rock')" class="h-[130px] w-[130px] rounded-full bg-white absolute flex justify-center items-center border-[15px] border-[#dc2e4e] left-0 translate-x-[70%] bottom-[-55px] cursor-pointer">
+                <img src="images/icon-rock.svg" alt="">
+            </div>
+        </div>
+        <div v-if="step === 1">
+            <div class="h-[130px] w-[130px] rounded-full bg-white absolute flex justify-center items-center border-[15px] border-[#4865f4] left-0 top-[-55px] cursor-pointer">
+                <img :src="choiceSrc" alt="">
+            </div>
+        </div>
+    </div>
+    <div class="flex justify-center">
+        <div class="border-[2px] border-opacity-50 uppercase py-[12px] px-[35px] rounded-xl text-white">
+            Rules
+        </div>
+    </div>
+</div>
+<div class="attribution">
+    Challenge by <a href="https://www.frontendmentor.io?ref=challenge" target="_blank">Frontend Mentor</a>.
     Coded by <a href="#">Your Name Here</a>.
-  </div>
+</div>
 </body>
 </html>
+
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            selectedGame: 0,
+            score: 12,
+            step: 0,
+            choice: '',
+        },
+        methods: {
+            play: function(choice) {
+                this.step++;
+                this.choice = choice
+            }
+        },
+        computed: {
+            gameName() {
+                return [['Rock', 'Paper', 'Scissors'], ['Rock', 'Paper', 'Scissors', 'Lizard', 'Spock']][this.selectedGame]
+            },
+            choiceSrc() {
+                return `images/icon-${this.choice}.svg`
+            }
+        }
+    })
+</script>
