@@ -7,6 +7,13 @@
 
     <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
 
+    <style type="text/tailwindcss">
+
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+
     <script src="https://cdn-tailwindcss.vercel.app"></script>
 
     <script>
@@ -23,13 +30,6 @@
             },
         }
     </script>
-
-    <style type="text/tailwindcss">
-
-    </style>
-
-    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
-    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
 
     <title>Frontend Mentor | Rock, Paper, Scissors</title>
 
@@ -59,7 +59,7 @@
     </style>
 </head>
 <body class="bg-gradient-radial from-[#1f3756] to-[#141539] h-screen w-screen p-[32px] pb-[54px]">
-<div id="app" class="w-full h-full flex flex-col justify-between max-w-[660px] mx-auto">
+<div id="app" class="w-full h-full flex flex-col justify-between max-w-[660px] min-h-[660px] mx-auto">
     <div class="border-[3px] border-opacity-50 border-[#606e85] rounded w-full flex pl-[20px] pr-[10px] py-[12px] justify-between">
         <ul class="flex flex-col justify-center">
             <li v-for="choice in gameName" class="text-xl text-white leading-4 uppercase font-bold">{{ choice }}</li>
@@ -72,19 +72,17 @@
     <div class="flex justify-center mt-[85px] relative h-[200px] w-[311px] mx-auto">
         <div v-if="step === 0">
             <img class="h-[200px]" src="images/bg-triangle.svg" alt="bg-triangle">
-            <div @click="play('paper')" class="h-[130px] w-[130px] rounded-full bg-white absolute flex justify-center items-center border-[15px] border-[#4865f4] left-0 top-[-55px] cursor-pointer">
-                <img src="images/icon-paper.svg" alt="">
-            </div>
-            <div @click="play('scissors')" class="h-[130px] w-[130px] rounded-full bg-white absolute flex justify-center items-center border-[15px] border-[#ec9e0e] right-0 top-[-55px] cursor-pointer">
-                <img src="images/icon-scissors.svg" alt="">
-            </div>
-            <div @click="play('rock')" class="h-[130px] w-[130px] rounded-full bg-white absolute flex justify-center items-center border-[15px] border-[#dc2e4e] left-0 translate-x-[70%] bottom-[-55px] cursor-pointer">
-                <img src="images/icon-rock.svg" alt="">
+            <div v-for="(choice, index) in gameChoices" :title="choice.name" @click="play(choice)"
+                 :class="choiceBorder(choice.color) + ' ' + position(index)"
+                 class="h-[130px] w-[130px] rounded-full bg-white absolute flex justify-center items-center border-[15px] cursor-pointer">
+                <img :src="choice.img" :alt="choice.name">
             </div>
         </div>
         <div v-if="step === 1">
-            <div class="h-[130px] w-[130px] rounded-full bg-white absolute flex justify-center items-center border-[15px] border-[#4865f4] left-0 top-[-55px] cursor-pointer">
-                <img :src="choiceSrc" alt="">
+            <div :class="choiceBorder(this.choice.color)"
+                 :title="choice.name"
+                 class="h-[130px] w-[130px] rounded-full bg-white absolute flex justify-center items-center border-[15px] cursor-pointer">
+                <img :src="this.choice.img" :alt="this.choice.name">
             </div>
         </div>
     </div>
@@ -109,20 +107,71 @@
             score: 12,
             step: 0,
             choice: '',
+            choices: [
+                [
+                    {
+                        name: 'Rock',
+                        color: '#dc2e4e',
+                        img: 'images/icon-rock.svg'
+                    },
+                    {
+                        name: 'Paper',
+                        color: '#4865f4',
+                        img: 'images/icon-paper.svg'
+                    },
+                    {
+                        name: 'Scissors',
+                        color: '#ec9e0e',
+                        img: 'images/icon-scissors.svg'
+                    }
+                ],
+                [
+                    {
+                        name: 'Rock',
+                        color: '#dc2e4e',
+                        img: 'images/icon-rock.svg'
+                    },
+                    {
+                        name: 'Paper',
+                        color: '#4865f4',
+                        img: 'images/icon-pepper.svg'
+                    },
+                    {
+                        name: 'Scissors',
+                        color: '#ec9e0e',
+                        img: 'images/icon-scissors.svg'
+                    }, 'Lizard', 'Spock']]
         },
         methods: {
-            play: function(choice) {
+            play: function (choice) {
                 this.step++;
                 this.choice = choice
+            },
+            choiceBorder: function (color) {
+                return `border-[${color}]`
+            },
+            position: function (index) {
+                console.log(index)
+                switch (index) {
+                    case 0:
+                        return 'left-0 top-[-55px]'
+                    case 1:
+                        return 'right-0 top-[-55px]'
+                    case 2:
+                        return 'left-0 translate-x-[70%] bottom-[-55px]'
+                }
             }
         },
         computed: {
             gameName() {
-                return [['Rock', 'Paper', 'Scissors'], ['Rock', 'Paper', 'Scissors', 'Lizard', 'Spock']][this.selectedGame]
+                return this.gameChoices.map((e) => e.name)
+            },
+            gameChoices() {
+                return this.choices[this.selectedGame]
             },
             choiceSrc() {
                 return `images/icon-${this.choice}.svg`
-            }
-        }
+            },
+        },
     })
 </script>
