@@ -19,6 +19,9 @@
     <script>
         tailwind.config = {
             theme: {
+                screens: {
+                    d: '1366px',
+                },
                 extend: {
                     backgroundImage: {
                         'gradient-radial': 'radial-gradient(ellipse at center, var(--tw-gradient-stops))',
@@ -58,32 +61,50 @@
         }
     </style>
 </head>
-<body class="bg-gradient-radial from-[#1f3756] to-[#141539] h-screen w-screen p-[32px] pb-[54px]">
-<div id="app" class="w-full h-full flex flex-col justify-between max-w-[660px] min-h-[660px] mx-auto">
+<body class="bg-gradient-radial from-[#1f3756] to-[#141539] min-h-screen h-full w-screen p-[32px] pb-[54px]">
+<div id="app" class="flex flex-col justify-between max-w-[660px] d:max-w-[760px] min-h-[581px] mx-auto my-auto">
     <div class="border-[3px] border-opacity-50 border-[#606e85] rounded w-full flex pl-[20px] pr-[10px] py-[12px] justify-between">
         <ul class="flex flex-col justify-center">
-            <li v-for="choice in gameName" class="text-xl text-white leading-4 uppercase font-bold">{{ choice }}</li>
+            <li v-for="choice in gameName" class="text-xl d:text-3xl text-white leading-4 d:leading-[25px] uppercase font-bold">{{ choice }}</li>
         </ul>
         <div class="flex flex-col items-center bg-white px-[20px] py-[10px] rounded">
             <div class="uppercase text-xs text-[#2a46c0] font-semibold tracking-widest">Score</div>
-            <div class="text-4xl font-bold">{{ score }}</div>
+            <div class="text-4xl d:text-5xl font-bold">{{ score }}</div>
         </div>
     </div>
-    <div class="flex justify-center mt-[85px] relative h-[200px] w-[311px] mx-auto">
-        <div v-if="step === 0">
-            <img class="h-[200px]" src="images/bg-triangle.svg" alt="bg-triangle">
+    <div class="flex justify-center items-center w-full h-full">
+        <div class="h-[200px] w-[310px] mx-auto relative" v-if="step === 1">
+            <img class="h-[200px] mx-auto" src="images/bg-triangle.svg" alt="bg-triangle">
             <div v-for="(choice, index) in gameChoices" :title="choice.name" @click="play(choice)"
                  :class="choiceBorder(choice.color) + ' ' + position(index)"
                  class="h-[130px] w-[130px] rounded-full bg-white absolute flex justify-center items-center border-[15px] cursor-pointer">
                 <img :src="choice.img" :alt="choice.name">
             </div>
         </div>
-        <div v-if="step === 1">
+        <div v-if="step > 1"
+             class="grid grid-rows-[150px,75px] d:grid-rows-[300px,100px] my-auto w-full items-center justify-center relative"
+             :class="stepCols">
             <div :class="choiceBorder(this.choice.color)"
                  :title="choice.name"
-                 class="h-[130px] w-[130px] rounded-full bg-white absolute flex justify-center items-center border-[15px] cursor-pointer">
-                <img :src="this.choice.img" :alt="this.choice.name">
+                 class="mx-auto h-[130px] w-[130px] d:h-[250px] d:w-[250px] rounded-full bg-white flex justify-center items-center border-[15px] d:border-[30px]">
+                <img class="h-[50px] w-[50px] d:h-[100px] d:w-[100px]" :src="this.choice.img" :alt="this.choice.name">
             </div>
+            <div v-if="step === 4" @click="playAgain()" class="flex flex-col items-center row-start-3 col-span-2 d:col-span-1 d:rows-start-1 mt-[10px] d:mt-0">
+                <div class="text-5xl text-white uppercase font-bold">{{ this.message }}</div>
+                <div class="flex flex-col items-center bg-white px-[60px] py-[10px] rounded mt-4 d:mt-2">
+                    <div class="uppercase text-[#2a46c0] font-semibold tracking-widest">Play again</div>
+                </div>
+            </div>
+            <div v-if="this.houseChoice === ''"
+                 class="mx-auto h-[115px] w-[115px] d:h-[250px] d:w-[250px] rounded-full bg-[#172240] flex justify-center items-center"></div>
+            <div v-else :class="choiceBorder(this.houseChoice.color)"
+                 :title="houseChoice.name"
+                 class="mx-auto h-[130px] w-[130px] d:h-[250px] d:w-[250px] rounded-full bg-white flex justify-center items-center border-[15px] d:border-[30px]">
+                <img class="h-[50px] w-[50px] d:h-[100px] d:w-[100px]" :src="this.houseChoice.img"
+                     :alt="this.houseChoice.name">
+            </div>
+            <div class="uppercase text-lg text-white mx-auto">You picked</div>
+            <div class="uppercase text-lg text-white mx-auto" :class="step === 4 ? 'd:col-start-3' : ''">The house picked</div>
         </div>
     </div>
     <div class="flex justify-center">
@@ -102,27 +123,44 @@
 <script>
     var app = new Vue({
         el: '#app',
+        mounted() {
+            this.$nextTick(() => {
+                window.addEventListener('resize', this.onResize);
+            })
+        },
+        beforeDestroy() {
+            window.removeEventListener('resize', this.onResize);
+        },
         data: {
+            windowWidth: window.innerWidth,
             selectedGame: 0,
-            score: 12,
-            step: 0,
+            score: 0,
+            step: 1,
             choice: '',
+            houseChoice: '',
+            message : '',
             choices: [
                 [
                     {
                         name: 'Rock',
                         color: '#dc2e4e',
-                        img: 'images/icon-rock.svg'
+                        img: 'images/icon-rock.svg',
+                        strength: ['Scissors'],
+                        weakness: ['Paper'],
                     },
                     {
                         name: 'Paper',
                         color: '#4865f4',
-                        img: 'images/icon-paper.svg'
+                        img: 'images/icon-paper.svg',
+                        strength: ['Rock'],
+                        weakness: ['Scissors'],
                     },
                     {
                         name: 'Scissors',
                         color: '#ec9e0e',
-                        img: 'images/icon-scissors.svg'
+                        img: 'images/icon-scissors.svg',
+                        strength: ['Paper'],
+                        weakness: ['Rock'],
                     }
                 ],
                 [
@@ -143,15 +181,32 @@
                     }, 'Lizard', 'Spock']]
         },
         methods: {
+            onResize() {
+                this.windowWidth = window.innerWidth
+            },
             play: function (choice) {
-                this.step++;
+                this.step++; //STEP 2
                 this.choice = choice
+                setTimeout(() => {
+                    this.step++ //STEP 3
+                    this.houseChoice = this.gameChoices[Math.floor(Math.random() * this.gameChoices.length)]
+                    setTimeout(() => {
+                        this.step++ //STEP 4
+                        if (choice.strength.includes(this.houseChoice.name)) {
+                            this.message= 'You win'
+                            this.score++
+                        }
+                        else if (choice.weakness.includes(this.houseChoice.name))
+                            this.message= 'You loose'
+                        else
+                            this.message= 'Tie'
+                    }, 1000)
+                }, 1000)
             },
             choiceBorder: function (color) {
                 return `border-[${color}]`
             },
             position: function (index) {
-                console.log(index)
                 switch (index) {
                     case 0:
                         return 'left-0 top-[-55px]'
@@ -160,6 +215,11 @@
                     case 2:
                         return 'left-0 translate-x-[70%] bottom-[-55px]'
                 }
+            },
+            playAgain() {
+                this.step = 1
+                this.houseChoice = ''
+                this.choice = ''
             }
         },
         computed: {
@@ -169,9 +229,9 @@
             gameChoices() {
                 return this.choices[this.selectedGame]
             },
-            choiceSrc() {
-                return `images/icon-${this.choice}.svg`
-            },
+            stepCols() {
+                return this.step === 4 ? 'grid-cols-2 d:grid-cols-3' : 'grid-cols-2'
+            }
         },
     })
 </script>
