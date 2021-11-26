@@ -12,8 +12,6 @@
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
-    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
-
     <script src="https://cdn-tailwindcss.vercel.app"></script>
 
     <script>
@@ -61,61 +59,84 @@
         }
     </style>
 </head>
-<body class="bg-gradient-radial from-[#1f3756] to-[#141539] min-h-screen h-full w-screen p-[32px] pb-[54px]">
-<div id="app" class="flex flex-col justify-between max-w-[660px] d:max-w-[760px] min-h-[581px] mx-auto my-auto">
-    <div class="border-[3px] border-opacity-50 border-[#606e85] rounded w-full flex pl-[20px] pr-[10px] py-[12px] justify-between">
-        <ul class="flex flex-col justify-center">
-            <li v-for="choice in gameName" class="text-xl d:text-3xl text-white leading-4 d:leading-[25px] uppercase font-bold">{{ choice }}</li>
-        </ul>
-        <div class="flex flex-col items-center bg-white px-[20px] py-[10px] rounded">
-            <div class="uppercase text-xs text-[#2a46c0] font-semibold tracking-widest">Score</div>
-            <div class="text-4xl d:text-5xl font-bold">{{ score }}</div>
+<body>
+<div id="app">
+    <div v-if="this.showModal"
+         class="bg-white h-full w-full absolute z-10 grid grid-rows-3 justify-center items-center">
+        <div class="text-4xl text-[#3b4363] uppercase font-bold text-center">Rules</div>
+        <img :src="this.selectedGame === 0 ? 'images/image-rules.svg' : 'images/image-rules-bonus.svg'" alt="Rules">
+        <div class="flex justify-center">
+            <img class="cursor-pointer" src="images/icon-close.svg" alt="Close" @click="toggleModal()">
         </div>
     </div>
-    <div class="flex justify-center items-center w-full h-full">
-        <div class="h-[200px] w-[310px] mx-auto relative" v-if="step === 1">
-            <img class="h-[200px] mx-auto" src="images/bg-triangle.svg" alt="bg-triangle">
-            <div v-for="(choice, index) in gameChoices" :title="choice.name" @click="play(choice)"
-                 :class="choiceBorder(choice.color) + ' ' + position(index)"
-                 class="h-[130px] w-[130px] rounded-full bg-white absolute flex justify-center items-center border-[15px] cursor-pointer">
-                <img :src="choice.img" :alt="choice.name">
-            </div>
-        </div>
-        <div v-if="step > 1"
-             class="grid grid-rows-[150px,75px] d:grid-rows-[300px,100px] my-auto w-full items-center justify-center relative"
-             :class="stepCols">
-            <div :class="choiceBorder(this.choice.color)"
-                 :title="choice.name"
-                 class="mx-auto h-[130px] w-[130px] d:h-[250px] d:w-[250px] rounded-full bg-white flex justify-center items-center border-[15px] d:border-[30px]">
-                <img class="h-[50px] w-[50px] d:h-[100px] d:w-[100px]" :src="this.choice.img" :alt="this.choice.name">
-            </div>
-            <div v-if="step === 4" @click="playAgain()" class="flex flex-col items-center row-start-3 col-span-2 d:col-span-1 d:rows-start-1 mt-[10px] d:mt-0">
-                <div class="text-5xl text-white uppercase font-bold">{{ this.message }}</div>
-                <div class="flex flex-col items-center bg-white px-[60px] py-[10px] rounded mt-4 d:mt-2">
-                    <div class="uppercase text-[#2a46c0] font-semibold tracking-widest">Play again</div>
+    <div class="bg-gradient-radial from-[#1f3756] to-[#141539] min-h-screen h-full w-screen p-[32px] pb-[54px] relative flex">
+        <div class="flex flex-col justify-between max-w-[660px] d:max-w-[760px] min-h-[581px] mx-auto my-auto w-full">
+            <div class="border-[3px] border-opacity-50 border-[#606e85] rounded w-full flex pl-[20px] pr-[10px] py-[12px] justify-between">
+                <ul class="flex flex-col justify-center">
+                    <li v-for="choice in gameName"
+                        class="text-white uppercase font-bold"
+                        :class="selectedGame === 1 ? 'text-xl leading-4' : 'text-xl d:text-3xl leading-4 d:leading-[25px]'">
+                        {{ choice }}
+                    </li>
+                </ul>
+                <div class="flex flex-col items-center bg-white px-[20px] py-[10px] rounded">
+                    <div class="uppercase text-xs text-[#2a46c0] font-semibold tracking-widest">Score</div>
+                    <div class="text-4xl d:text-5xl font-bold">{{ score }}</div>
                 </div>
             </div>
-            <div v-if="this.houseChoice === ''"
-                 class="mx-auto h-[115px] w-[115px] d:h-[250px] d:w-[250px] rounded-full bg-[#172240] flex justify-center items-center"></div>
-            <div v-else :class="choiceBorder(this.houseChoice.color)"
-                 :title="houseChoice.name"
-                 class="mx-auto h-[130px] w-[130px] d:h-[250px] d:w-[250px] rounded-full bg-white flex justify-center items-center border-[15px] d:border-[30px]">
-                <img class="h-[50px] w-[50px] d:h-[100px] d:w-[100px]" :src="this.houseChoice.img"
-                     :alt="this.houseChoice.name">
+            <div class="flex justify-center items-center w-full h-full">
+                <div class="h-[200px] w-[310px] mx-auto relative" v-if="step === 1">
+                    <img class="h-[200px] mx-auto"
+                         :src="selectedGame === 0 ? 'images/bg-triangle.svg' : 'images/bg-pentagon.svg'"
+                         alt="bg-triangle">
+                    <div v-for="(choice, index) in gameChoices" :title="choice.name" @click="play(choice)"
+                         :class="choiceBorder(choice.color) + ' ' + choicePosition(index) + ' ' + choiceSize"
+                         class="rounded-full bg-white absolute flex justify-center items-center border-[15px] cursor-pointer">
+                        <img :src="choice.img" :alt="choice.name" :class="choiceIconSize">
+                    </div>
+                </div>
+                <div v-if="step > 1"
+                     class="grid grid-rows-[150px,75px] d:grid-rows-[300px,100px] my-auto w-full items-center justify-center relative grid-cols-2">
+                    <div :class="choiceBorder(this.choice.color)"
+                         :title="choice.name"
+                         class="mx-auto h-[130px] w-[130px] d:h-[250px] d:w-[250px] rounded-full bg-white flex justify-center items-center border-[15px] d:border-[30px]">
+                        <img class="h-[50px] w-[50px] d:h-[100px] d:w-[100px]" :src="this.choice.img"
+                             :alt="this.choice.name">
+                    </div>
+                    <div v-if="step === 4" @click="playAgain()"
+                         class="flex flex-col items-center row-start-3 col-span-2 d:col-span-1 d:col-start-2 d:row-start-1 mt-[10px] d:mt-0">
+                        <div class="text-5xl text-white uppercase font-bold">{{ this.message }}</div>
+                        <div class="flex flex-col items-center bg-white px-[60px] py-[10px] rounded mt-4 d:mt-2 cursor-pointer">
+                            <div class="uppercase text-[#2a46c0] font-semibold tracking-widest">Play again</div>
+                        </div>
+                    </div>
+                    <div v-if="this.houseChoice === ''"
+                         class="mx-auto h-[115px] w-[115px] d:h-[250px] d:w-[250px] rounded-full bg-[#172240] flex justify-center items-center"></div>
+                    <div v-else :class="choiceBorder(this.houseChoice.color)"
+                         :title="houseChoice.name"
+                         class="mx-auto h-[130px] w-[130px] d:h-[250px] d:w-[250px] rounded-full bg-white flex justify-center items-center border-[15px] d:border-[30px]"
+                    >
+                        <img class="h-[50px] w-[50px] d:h-[100px] d:w-[100px]" :src="this.houseChoice.img"
+                             :alt="this.houseChoice.name">
+                    </div>
+                    <div class="uppercase text-lg text-white mx-auto d:row-start-2">You picked</div>
+                    <div class="uppercase text-lg text-white mx-auto d:row-start-2"
+                         :class="step > 3 ? 'd:col-start-3' : ''">The house picked
+                    </div>
+                </div>
             </div>
-            <div class="uppercase text-lg text-white mx-auto">You picked</div>
-            <div class="uppercase text-lg text-white mx-auto" :class="step === 4 ? 'd:col-start-3' : ''">The house picked</div>
+            <div class="flex justify-center">
+                <div class="border-[2px] border-opacity-50 uppercase py-[12px] px-[35px] rounded-xl text-white cursor-pointer"
+                     @click="toggleModal()">
+                    Rules
+                </div>
+            </div>
+        </div>
+        <div class="attribution">
+            Challenge by <a href="https://www.frontendmentor.io?ref=challenge" target="_blank">Frontend Mentor</a>.
+            Coded by <a href="#">Your Name Here</a>.
         </div>
     </div>
-    <div class="flex justify-center">
-        <div class="border-[2px] border-opacity-50 uppercase py-[12px] px-[35px] rounded-xl text-white">
-            Rules
-        </div>
-    </div>
-</div>
-<div class="attribution">
-    Challenge by <a href="https://www.frontendmentor.io?ref=challenge" target="_blank">Frontend Mentor</a>.
-    Coded by <a href="#">Your Name Here</a>.
 </div>
 </body>
 </html>
@@ -123,22 +144,13 @@
 <script>
     var app = new Vue({
         el: '#app',
-        mounted() {
-            this.$nextTick(() => {
-                window.addEventListener('resize', this.onResize);
-            })
-        },
-        beforeDestroy() {
-            window.removeEventListener('resize', this.onResize);
-        },
         data: {
-            windowWidth: window.innerWidth,
             selectedGame: 0,
             score: 0,
             step: 1,
             choice: '',
             houseChoice: '',
-            message : '',
+            message: '',
             choices: [
                 [
                     {
@@ -161,29 +173,53 @@
                         img: 'images/icon-scissors.svg',
                         strength: ['Paper'],
                         weakness: ['Rock'],
-                    }
+                    },
                 ],
                 [
                     {
                         name: 'Rock',
                         color: '#dc2e4e',
-                        img: 'images/icon-rock.svg'
+                        img: 'images/icon-rock.svg',
+                        strength: ['Lizard', 'Scissors'],
+                        weakness: ['Paper', 'Spock'],
                     },
                     {
                         name: 'Paper',
                         color: '#4865f4',
-                        img: 'images/icon-pepper.svg'
+                        img: 'images/icon-paper.svg',
+                        strength: ['Rock', 'Spock'],
+                        weakness: ['Scissors', 'Lizard'],
                     },
                     {
                         name: 'Scissors',
                         color: '#ec9e0e',
-                        img: 'images/icon-scissors.svg'
-                    }, 'Lizard', 'Spock']]
+                        img: 'images/icon-scissors.svg',
+                        strength: ['Paper', 'Lizard'],
+                        weakness: ['Rock', 'Spock'],
+                    },
+                    {
+                        name: 'Lizard',
+                        color: '#834fe3',
+                        img: 'images/icon-lizard.svg',
+                        strength: ['Spock', 'Paper'],
+                        weakness: ['Rock', 'Scissors'],
+                    },
+                    {
+                        name: 'Spock',
+                        color: '#40b9ce',
+                        img: 'images/icon-spock.svg',
+                        strength: ['Scissors', 'Rock'],
+                        weakness: ['Paper', 'Lizard'],
+                    },
+                ]
+            ],
+            showModal: false,
+            keyword: '',
+        },
+        created() {
+            window.addEventListener('keypress', this.bazinga);
         },
         methods: {
-            onResize() {
-                this.windowWidth = window.innerWidth
-            },
             play: function (choice) {
                 this.step++; //STEP 2
                 this.choice = choice
@@ -193,34 +229,66 @@
                     setTimeout(() => {
                         this.step++ //STEP 4
                         if (choice.strength.includes(this.houseChoice.name)) {
-                            this.message= 'You win'
                             this.score++
-                        }
-                        else if (choice.weakness.includes(this.houseChoice.name))
-                            this.message= 'You loose'
+                            if (this.score >= 5) {
+                                this.message = 'Bazinga'
+                            } else {
+                                this.message = 'You win'
+                            }
+                        } else if (choice.weakness.includes(this.houseChoice.name))
+                            this.message = 'You loose'
                         else
-                            this.message= 'Tie'
+                            this.message = 'Tie'
                     }, 1000)
                 }, 1000)
+            },
+            bazinga: function (event) {
+                this.keyword += event.key
+                if (this.keyword.split('bazinga')[1] !== undefined) {
+                    new Audio('audios/bazinga.mp3').play()
+                    this.selectedGame = Number(!this.selectedGame)
+                    this.keyword = ''
+                }
             },
             choiceBorder: function (color) {
                 return `border-[${color}]`
             },
-            position: function (index) {
-                switch (index) {
-                    case 0:
-                        return 'left-0 top-[-55px]'
-                    case 1:
-                        return 'right-0 top-[-55px]'
-                    case 2:
-                        return 'left-0 translate-x-[70%] bottom-[-55px]'
+            choicePosition: function (index) {
+                if (this.selectedGame === 0) {
+                    switch (index) {
+                        case 0:
+                            return 'left-0 translate-x-[70%] bottom-[-55px]'
+                        case 1:
+                            return 'left-0 top-[-55px]'
+                        case 2:
+                            return 'right-0 top-[-55px]'
+                    }
+                } else {
+                    switch (index) {
+                        case 0:
+                            return 'right-[75px] translate-x-[40%] bottom-[-50px]'
+                        case 1:
+                            return 'right-0 top-[25px]'
+                        case 2:
+                            return 'right-[105px] top-[-50px]'
+                        case 3:
+                            return 'left-0 translate-x-[40%] bottom-[-50px]'
+                        case 4:
+                            return 'left-0 top-[25px]'
+                    }
                 }
             },
             playAgain() {
                 this.step = 1
                 this.houseChoice = ''
                 this.choice = ''
-            }
+            },
+            toggleModal() {
+                if (!this.showModal && this.selectedGame === 1) {
+                    new Audio('audios/rules-bonus.mp3').play()
+                }
+                this.showModal = !this.showModal
+            },
         },
         computed: {
             gameName() {
@@ -229,9 +297,12 @@
             gameChoices() {
                 return this.choices[this.selectedGame]
             },
-            stepCols() {
-                return this.step === 4 ? 'grid-cols-2 d:grid-cols-3' : 'grid-cols-2'
-            }
+            choiceSize() {
+                return this.selectedGame === 0 ? 'h-[130px] w-[130px]' : 'h-[100px] w-[100px]'
+            },
+            choiceIconSize() {
+                return this.selectedGame === 0 ? 'h-[48px] w-[48px]' : 'h-[33px] w-[33px]'
+            },
         },
     })
 </script>
